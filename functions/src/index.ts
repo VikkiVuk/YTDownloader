@@ -59,6 +59,10 @@ async function downloadAndStreamVideo(videoUrl, wsc) {
     }
 }
 
+app.get('/', (req, res) => {
+    res.send({ status: "online", message: "Please connect using the websocket to download!" });
+})
+
 app.get('/ws', (req, res) => {
     res.setHeader('Upgrade', 'websocket');
     res.setHeader('Connection', 'Upgrade');
