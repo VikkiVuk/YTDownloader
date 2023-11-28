@@ -1,4 +1,3 @@
-import * as firebase from "firebase-functions";
 import express from "express";
 import ytdl from "ytdl-core";
 import ws from "ws";
@@ -69,4 +68,5 @@ app.get('/ws', (req, res) => {
     res.status(101).send(); // Upgrade the connection to WebSocket
 });
 
-export const api = firebase.https.onRequest(app);
+const port = process.env.PORT || 8080;
+app.listen(port, () => { console.log(">>> App online") });
