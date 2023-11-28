@@ -11,7 +11,7 @@ const Home = (props) => {
             toast.error('Please enter a link to download.', { theme: 'dark' });
         } else {
             const loading = toast.loading('Opening connection...', { theme: 'dark' });
-            const socket = new WebSocket('wss://us-central1-wulfco-downloader.cloudfunctions.net/api');
+            const socket = new WebSocket('wss://ytdownloader-tmwgc24efq-uc.a.run.app');
 
             let videoChunks = [];
 

@@ -16,6 +16,7 @@ app.use(express.json());
 const wss = new ws.Server({ server });
 
 wss.on('connection', (wssc) => {
+    console.log('>>> Client connected');
     wssc.on('message', (message) => {
         console.log('Received message => ' + message)
         const videoUrl = JSON.parse(message).url;
