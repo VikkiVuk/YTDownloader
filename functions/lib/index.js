@@ -3,18 +3,24 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+const http_1 = __importDefault(require("http"));
 const express_1 = __importDefault(require("express"));
 const ytdl_core_1 = __importDefault(require("ytdl-core"));
 const ws_1 = __importDefault(require("ws"));
-const app = (0, express_1.default)();
 const cors_1 = __importDefault(require("cors"));
+const app = (0, express_1.default)();
 const port = process.env.PORT || 8080;
-const server = app.listen(port, () => { console.log(">>> App online"); });
 app.use((0, cors_1.default)());
 app.use(express_1.default.json());
-app.get('/', (req, res) => {
+app.get("/", (req, res) => {
     res.send({ status: "online", message: "Please connect using the websocket to download!" });
 });
+app.get('/ws', (req, res) => {
+    res.setHeader('Upgrade', 'websocket');
+    res.setHeader('Connection', 'Upgrade');
+    res.status(101).send(); // Upgrade the connection to WebSocket
+});
+const server = http_1.default.createServer(app);
 const wss = new ws_1.default.Server({ server });
 wss.on('connection', (wssc) => {
     console.log('>>> Client connected');
@@ -29,6 +35,7 @@ wss.on('connection', (wssc) => {
         // Clean up WebSocket resources
     });
 });
+server.listen(port, () => { console.log(">>> App online"); });
 async function downloadAndStreamVideo(videoUrl, wsc) {
     try {
         const info = await ytdl_core_1.default.getInfo(videoUrl);
@@ -56,9 +63,4 @@ async function downloadAndStreamVideo(videoUrl, wsc) {
         wsc.close();
     }
 }
-app.get('/ws', (req, res) => {
-    res.setHeader('Upgrade', 'websocket');
-    res.setHeader('Connection', 'Upgrade');
-    res.status(101).send(); // Upgrade the connection to WebSocket
-});
 //# sourceMappingURL=index.js.map

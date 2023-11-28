@@ -1,20 +1,26 @@
+import http from 'http';
 import express from "express";
 import ytdl from "ytdl-core";
 import ws from "ws";
-
-const app = express();
 import cors from "cors";
 
+const app = express();
 const port = process.env.PORT || 8080;
-const server = app.listen(port, () => { console.log(">>> App online") });
 
 app.use(cors());
 app.use(express.json());
 
-app.get('/', (req, res) => {
+app.get("/", (req, res) => {
     res.send({ status: "online", message: "Please connect using the websocket to download!" });
-})
+});
 
+app.get('/ws', (req, res) => {
+    res.setHeader('Upgrade', 'websocket');
+    res.setHeader('Connection', 'Upgrade');
+    res.status(101).send(); // Upgrade the connection to WebSocket
+});
+
+const server = http.createServer(app);
 const wss = new ws.Server({ server });
 
 wss.on('connection', (wssc) => {
@@ -31,6 +37,8 @@ wss.on('connection', (wssc) => {
         // Clean up WebSocket resources
     });
 });
+
+server.listen(port, () => { console.log(">>> App online") });
 
 async function downloadAndStreamVideo(videoUrl, wsc) {
     try {
@@ -60,9 +68,3 @@ async function downloadAndStreamVideo(videoUrl, wsc) {
         wsc.close();
     }
 }
-
-app.get('/ws', (req, res) => {
-    res.setHeader('Upgrade', 'websocket');
-    res.setHeader('Connection', 'Upgrade');
-    res.status(101).send(); // Upgrade the connection to WebSocket
-});
