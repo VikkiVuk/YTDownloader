@@ -5,12 +5,15 @@ import ws from "ws";
 const app = express();
 import cors from "cors";
 
-const server = app.listen(() => {
-    console.log(`>>> App online`);
-});
+const port = process.env.PORT || 8080;
+const server = app.listen(port, () => { console.log(">>> App online") });
 
 app.use(cors());
 app.use(express.json());
+
+app.get('/', (req, res) => {
+    res.send({ status: "online", message: "Please connect using the websocket to download!" });
+})
 
 const wss = new ws.Server({ server });
 
@@ -58,15 +61,8 @@ async function downloadAndStreamVideo(videoUrl, wsc) {
     }
 }
 
-app.get('/', (req, res) => {
-    res.send({ status: "online", message: "Please connect using the websocket to download!" });
-})
-
 app.get('/ws', (req, res) => {
     res.setHeader('Upgrade', 'websocket');
     res.setHeader('Connection', 'Upgrade');
     res.status(101).send(); // Upgrade the connection to WebSocket
 });
-
-const port = process.env.PORT || 8080;
-app.listen(port, () => { console.log(">>> App online") });
