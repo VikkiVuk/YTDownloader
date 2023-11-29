@@ -4,6 +4,9 @@
 # If you need more help, visit the Dockerfile reference guide at
 # https://docs.docker.com/engine/reference/builder/
 
+# enable the stupid buildkit
+ENV DOCKER_BUILDKIT=1
+
 ARG NODE_VERSION=20.8.0
 
 ################################################################################
@@ -62,8 +65,6 @@ COPY package.json .
 COPY --from=deps /usr/src/app/node_modules ./node_modules
 COPY --from=build /usr/src/app/lib ./lib
 
-# enable the stupid buildkit
-ENV DOCKER_BUILDKIT=1
 # Expose the port that the application listens on.
 EXPOSE 8080
 
