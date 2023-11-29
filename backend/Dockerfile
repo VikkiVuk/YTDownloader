@@ -1,11 +1,8 @@
-# syntax=docker/dockerfile:1.2
+# syntax=docker/dockerfile:1
 
 # Comments are provided throughout this file to help you get started.
 # If you need more help, visit the Dockerfile reference guide at
 # https://docs.docker.com/engine/reference/builder/
-
-# enable the stupid buildkit
-ENV DOCKER_BUILDKIT=1
 
 ARG NODE_VERSION=20.8.0
 
@@ -16,24 +13,14 @@ FROM node:${NODE_VERSION}-alpine as base
 # Set working directory for all build stages.
 WORKDIR /usr/src/app
 
-
-################################################################################
-# Create a stage for installing production dependecies.
-FROM base as deps
-
-################################################################################
-# Create a stage for building the application.
-FROM deps as build
-
-# Copy the rest of the source files into the image.
-COPY . .
-# Run the build script.
-RUN npm run build
-
 ################################################################################
 # Create a new stage to run the application with minimal runtime dependencies
 # where the necessary files are copied from the build stage.
 FROM base as final
+
+COPY . .
+
+RUN npm run build
 
 # Use production node environment by default.
 ENV NODE_ENV production
