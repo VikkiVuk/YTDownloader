@@ -18,10 +18,6 @@ WORKDIR /usr/src/app
 # where the necessary files are copied from the build stage.
 FROM base as final
 
-COPY . .
-
-RUN npm run build
-
 # Use production node environment by default.
 ENV NODE_ENV production
 
