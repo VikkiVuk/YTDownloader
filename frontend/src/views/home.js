@@ -25,39 +25,53 @@ const Home = (props) => {
             });
 
             let started = false;
+            let fileFormat = 'mp4';
+            let totalBytes = 0;
+            let downloadedBytes = 0;
+            let videoTitle = '';
 
             socket.addEventListener('message', (event) => {
                 if (!started) {
                     started = true;
+                    toast.update(loading, { render: 'Downloading...', type: 'info', theme: 'dark', isLoading: true });
                 }
 
                 const data = JSON.parse(event.data);
                 if (data.type === 'metadata') {
                     // Handle video metadata
-                    const videoTitle = data.title;
-                    const totalBytes = data.size;
+                    videoTitle = data.title;
+                    totalBytes = data.size;
+                    fileFormat = data.fileFormat;
                     console.log(`Video Title: ${videoTitle}`);
                     console.log(`Total Bytes: ${totalBytes}`);
+                    console.log(`File Format: ${fileFormat}`);
 
-                    toast.update(loading, { render: `Starting download of ${videoTitle}...`, type: 'info', theme: 'dark', isLoading: true });
+                    toast.update(loading, {
+                        render: `Starting download of ${videoTitle}...`,
+                        type: 'info',
+                        theme: 'dark',
+                        isLoading: true
+                    });
                 } else if (data.type === 'chunk') {
                     // Handle received video chunk
-                    const chunk = new Uint8Array(data.data).buffer; // Converting to ArrayBuffer
+                    const chunk = new Uint8Array(data.data.data);
+                    downloadedBytes += chunk.byteLength;
                     console.log(`Received chunk: ${chunk.byteLength} bytes`);
                     videoChunks.push(chunk);
 
-                    toast.update(loading, { render: `Downloading... ${(videoChunks.length * 100 / (totalBytes / 1024 / 1024)).toFixed(2)}%`, type: 'info', theme: 'dark', isLoading: true });
+                    toast.update(loading, { render: `Downloading... ${((downloadedBytes / totalBytes) * 100).toFixed(2)}%`, type: 'info', theme: 'dark', isLoading: true });
                 } else if (data.type === 'end') {
                     // Handle end of video streaming
                     console.log('Video streaming completed.');
 
                     // Assemble the video chunks into a Blob
-                    const videoBlob = new Blob(videoChunks);
+                    const videoBlob = new Blob(videoChunks, { type: 'video/' + fileFormat });
 
                     // Create a download link for the video
                     const downloadLink = document.createElement('a');
                     downloadLink.href = URL.createObjectURL(videoBlob);
-                    downloadLink.download = 'video.mp4'; // Set the desired filename
+
+                    downloadLink.download = videoTitle + '.' + fileFormat; // Set the desired filename
 
                     // Simulate a click on the download link to initiate the download
                     downloadLink.click();

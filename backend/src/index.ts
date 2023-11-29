@@ -46,11 +46,13 @@ async function downloadAndStreamVideo(videoUrl, wsc) {
         const videoTitle = info.videoDetails.title;
         const totalBytes = info.formats.reduce((acc, format) => {
             const contentLength = format.contentLength;
-            return contentLength ? acc + parseInt(contentLength) : acc;
+            return (contentLength ? acc + parseInt(contentLength) : acc);
         }, 0);
 
+        const videoFormat = info.formats.find(format => format.hasVideo && format.hasAudio);
+
         // Send video title and size to connected WebSocket client
-        const metadata = { type: 'metadata', title: videoTitle, size: totalBytes };
+        const metadata = { type: 'metadata', title: videoTitle, size: totalBytes, fileFormat: videoFormat.container };
         wsc.send(JSON.stringify(metadata));
 
         // Download the YouTube video and send chunks through the WebSocket
